@@ -13,29 +13,63 @@
  *
  * Learn more at https://developers.cloudflare.com/workers/
  */
+import { WorkerEntrypoint, RpcTarget } from "cloudflare:workers";
 
-export default {
-	// Our fetch handler is invoked on a HTTP request: we can send a message to a queue
-	// during (or after) a request.
-	// https://developers.cloudflare.com/queues/platform/javascript-apis/#producer
-	async fetch(req, env, ctx): Promise<Response> {
-		// To send a message on a queue, we need to create the queue first
-		// https://developers.cloudflare.com/queues/get-started/#3-create-a-queue
-		await env.MY_QUEUE.send({
-			url: req.url,
-			method: req.method,
-			headers: Object.fromEntries(req.headers),
-		});
-		return new Response('Sent message to the queue');
-	},
-	// The queue handler is invoked when a batch of messages is ready to be delivered
-	// https://developers.cloudflare.com/queues/platform/javascript-apis/#messagebatch
-	async queue(batch, env): Promise<void> {
-		// A queue consumer can make requests to other endpoints on the Internet,
-		// write to R2 object storage, query a D1 Database, and much more.
-		for (let message of batch.messages) {
-			// Process each message (we'll just log these)
-			console.log(`message ${message.id} processed: ${JSON.stringify(message.body)}`);
-		}
-	},
-} satisfies ExportedHandler<Env, Error>;
+interface Env {
+  YOUR_QUEUE: Queue;
+  JWT_SECRET: string;
+}
+
+class Article extends RpcTarget {
+  id: number;
+  env: any;
+
+  constructor(id: number, env: Env) {
+    super();
+
+    // Note: Instance members like these are NOT exposed over RPC.
+    // Only class (prototype) methods and properties are exposed.
+    this.id = id;
+    this.env = env;
+  }
+
+  add(a: number, b: number): number {
+    console.log(this.env)
+    return a + b;
+  }
+
+  async create() {
+
+  }
+
+  async update() {
+
+  }
+
+  async delete() {
+
+  }
+
+  async buildStatic() {
+  }
+}
+
+export class ArticleService extends WorkerEntrypoint<{ Bindings: Env }> {
+  async init(id: number, env: Env) {
+    return {
+      article: new Article(id, env)
+    }
+  }
+
+}
+export default class extends WorkerEntrypoint<{ Bindings: Env }> {
+  async fetch(): Promise<Response> {
+    return new Response("970 tasks");
+  }
+
+  add(a: number, b: number): number {
+    console.log("start here:")
+    console.log(this);
+    return a + b;
+  }
+};

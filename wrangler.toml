@@ -80,17 +80,17 @@ compatibility_date = "2023-05-18"
 # Bind a Queue producer. Use this binding to schedule an arbitrary task that may be processed later by a Queue consumer.
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#queues
 [[queues.producers]]
-binding = "MY_QUEUE"
-queue = "my-queue"
+binding = "TASK_QUEUE"
+queue = "970"
 
 # Bind a Queue consumer. Queue Consumers can retrieve tasks scheduled by Producers to act on them.
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#queues
 [[queues.consumers]]
-queue = "my-queue"
+queue = "970"
 # Optional: Configure batching and retries: https://developers.cloudflare.com/queues/learning/batching-retries/
-# max_batch_size = 10
-# max_batch_timeout = 30
-# max_retries = 10
+max_batch_size = 10
+max_batch_timeout = 30
+max_retries = 10
 # dead_letter_queue = "my-queue-dlq"
 
 # Bind an R2 Bucket. Use R2 to store arbitrarily large blobs of data, such as files.
